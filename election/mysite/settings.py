@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import logging
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -121,19 +122,74 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 
+class SQLFormatter(logging.Formatter):
+    def format(self, record):
+
+        # Check if Pygments is available for coloring
+        try:
+            import pygments
+            from pygments.lexers import SqlLexer
+            from pygments.formatters import TerminalTrueColorFormatter
+        except ImportError:
+            pygments = None
+
+        # Check if sqlparse is available for indentation
+        try:
+            import sqlparse
+        except ImportError:
+            sqlparse = None
+
+        # Remove leading and trailing whitespaces
+        sql = record.sql.strip()
+
+        if sqlparse:
+            # Indent the SQL query
+            sql = sqlparse.format(sql, reindent=True)
+
+        if pygments:
+            # Highlight the SQL query
+            sql = pygments.highlight(
+                sql,
+                SqlLexer(),
+                # TerminalTrueColorFormatter(style='monokai')
+                TerminalTrueColorFormatter()
+            )
+
+        # Set the records statement to the formatted query
+        record.statement = sql
+        return super(SQLFormatter, self).format(record)
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'sql': {
+            '()': SQLFormatter,
+            'format': '[%(duration).3f] %(statement)s',
+        }
+    },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-        }
+        },
+        'sql': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'sql',
+            'level': 'DEBUG',
+        },
     },
     'loggers': {
         'django.db.backends': {
+            'handlers': ['sql'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.db.backends.schema': {
             'handlers': ['console'],
-            'lebel': 'DEBUG',
-        }
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     }
 }
