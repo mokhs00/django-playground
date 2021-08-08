@@ -13,7 +13,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>{{area}}</h1>
+      <h1>{{area}} 여론조사 결과</h1>
       <br />
       <table class="table table-striped">
         <thead>
@@ -30,8 +30,9 @@
             <td>
               {{result.start_date.year}}/{{result.start_date.month}}/{{result.start_date.day}}~{{result.end_date.year}}/{{result.end_date.month}}/{{result.end_date.day}}
             </td>
-            <td>후보1 지지율</td>
-            <td>후보2 지지율</td>
+            {% for rate in result.rates%}
+            <td>{{rate}}%</td>
+            {% endfor%}
           </tr>
           {% endfor %}
         </tbody>
