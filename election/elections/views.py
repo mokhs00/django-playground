@@ -8,6 +8,8 @@ from django.db.models import Sum
 
 
 def index(request):
+    candidate = Candidate.save(Candidate(name="KHS", introduction="hello",
+                                         area="Seoul", party_number="3", type=Candidate.CandidateType['A']))
     candidates = Candidate.objects.all()
     context = {'candidates': candidates}
     return render(request, 'elections/index.html', context)
