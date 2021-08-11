@@ -1,7 +1,7 @@
 import datetime
 from django.core.checks.messages import Error
-from django.http.response import HttpResponseRedirect
-from django.shortcuts import render
+from django.http.response import Http404, HttpResponseNotFound, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from .models import Candidate, Poll, Choice
 from django.db.models import Sum
@@ -84,5 +84,6 @@ def results(request, area):
 
 
 def candidates(request, name):
-    candidate = Candidate.objects.get(name=name)
+    candidate = get_object_or_404(Candidate, name=name)
+        
     return HttpResponse(candidate.name)
