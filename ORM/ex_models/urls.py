@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
 urlpatterns = [
-    path('create', views.create)
+    path('person', views.person),
+    path('questions', views.question),
+
 ]
